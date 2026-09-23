@@ -13,13 +13,17 @@ struct AmountPadContent: View {
     let onKey: (KeypadKey) -> Void
     let onSave: () -> Void
     let onDismissFailure: () -> Void
+    let onOpenMonth: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion: Bool
 
     var body: some View {
         VStack(spacing: Spacing.s6) {
-            MonthSpendHeader(spend: monthSpend)
-                .padding(.horizontal, Spacing.s4)
+            SummaryButton(action: onOpenMonth) {
+                MonthSpendHeader(spend: monthSpend)
+            }
+            .accessibilityHint(Text(verbatim: "Abre los movimientos del mes"))
+            .padding(.horizontal, Spacing.s4)
             Spacer(minLength: 0)
             typedAmount
                 .padding(.horizontal, Spacing.s4)
@@ -34,6 +38,7 @@ struct AmountPadContent: View {
         .padding(.vertical, Spacing.s4)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Palette.background)
+        .onSwipeUp(perform: onOpenMonth)
         .alert("Algo salió mal", isPresented: isShowingFailure) {
             Button("Aceptar", role: .cancel) {}
         } message: {
@@ -72,7 +77,8 @@ struct AmountPadContent: View {
         failure: nil,
         onKey: { _ in },
         onSave: {},
-        onDismissFailure: {}
+        onDismissFailure: {},
+        onOpenMonth: {}
     )
 }
 
@@ -87,7 +93,8 @@ struct AmountPadContent: View {
         failure: nil,
         onKey: { _ in },
         onSave: {},
-        onDismissFailure: {}
+        onDismissFailure: {},
+        onOpenMonth: {}
     )
 }
 
@@ -102,7 +109,8 @@ struct AmountPadContent: View {
         failure: nil,
         onKey: { _ in },
         onSave: {},
-        onDismissFailure: {}
+        onDismissFailure: {},
+        onOpenMonth: {}
     )
 }
 
@@ -117,7 +125,8 @@ struct AmountPadContent: View {
         failure: nil,
         onKey: { _ in },
         onSave: {},
-        onDismissFailure: {}
+        onDismissFailure: {},
+        onOpenMonth: {}
     )
 }
 
@@ -132,6 +141,7 @@ struct AmountPadContent: View {
         failure: .storageFailure,
         onKey: { _ in },
         onSave: {},
-        onDismissFailure: {}
+        onDismissFailure: {},
+        onOpenMonth: {}
     )
 }

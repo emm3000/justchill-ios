@@ -27,6 +27,10 @@ final class AppContainer {
         )
     }
 
+    func makeMonthModel() -> MonthModel {
+        MonthModel(transactions: transactions, clock: clock, zone: zone)
+    }
+
     private static func makeDatabaseURL() throws(DomainError) -> URL {
         let directory: URL = URL.applicationSupportDirectory
         do {

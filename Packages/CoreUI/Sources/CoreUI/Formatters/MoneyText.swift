@@ -13,8 +13,17 @@ public struct MoneyText: Equatable, Sendable {
     public let fraction: String
 
     public init(_ amount: Amount, sign: MoneySign = .unsigned) {
-        let soles: Int64 = amount.cents / Self.centsPerSol
-        let cents: Int64 = amount.cents % Self.centsPerSol
+        self.init(magnitude: amount.cents, sign: sign)
+    }
+
+    public init(netOf income: Amount, minus spend: Amount) {
+        let net: Int64 = income.cents - spend.cents
+        self.init(magnitude: abs(net), sign: MoneySign(net: net))
+    }
+
+    private init(magnitude: Int64, sign: MoneySign) {
+        let soles: Int64 = magnitude / Self.centsPerSol
+        let cents: Int64 = magnitude % Self.centsPerSol
         self.sign = sign
         prefix = sign.symbol + Self.symbol
         integer = Self.grouped(String(soles))

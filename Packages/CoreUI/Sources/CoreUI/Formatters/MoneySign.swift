@@ -5,6 +5,14 @@ public enum MoneySign: Sendable {
     case positive
     case negative
 
+    init(net: Int64) {
+        switch net {
+        case 1...: self = .positive
+        case 0: self = .unsigned
+        default: self = .negative
+        }
+    }
+
     public var tint: Color {
         switch self {
         case .positive: Palette.success

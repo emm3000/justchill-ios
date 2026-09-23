@@ -9,10 +9,8 @@ struct MonthSpendHeader: View {
         VStack(alignment: .leading, spacing: Spacing.s1) {
             Text(verbatim: "Gastado este mes")
                 .font(Typography.caption)
-                .foregroundStyle(Palette.textSecondary)
             Text(verbatim: money.text)
                 .font(Typography.amountRow)
-                .foregroundStyle(Palette.textSecondary)
                 .contentTransition(.numericText())
                 .opacity(spend == nil ? 0 : 1)
         }
@@ -28,13 +26,17 @@ struct MonthSpendHeader: View {
 }
 
 #Preview("Loaded") {
-    MonthSpendHeader(spend: (try? Amount(cents: 184_250)) ?? Amount.zero)
-        .padding(Spacing.s4)
-        .background(Palette.background)
+    SummaryButton(action: {}) {
+        MonthSpendHeader(spend: (try? Amount(cents: 184_250)) ?? Amount.zero)
+    }
+    .padding(Spacing.s4)
+    .background(Palette.background)
 }
 
 #Preview("Loading") {
-    MonthSpendHeader(spend: nil)
-        .padding(Spacing.s4)
-        .background(Palette.background)
+    SummaryButton(action: {}) {
+        MonthSpendHeader(spend: nil)
+    }
+    .padding(Spacing.s4)
+    .background(Palette.background)
 }
