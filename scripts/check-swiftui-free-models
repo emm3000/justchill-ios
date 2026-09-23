@@ -1,0 +1,22 @@
+#!/usr/bin/env zsh
+set -euo pipefail
+
+repo="${0:A:h:h}"
+cd "$repo/Packages"
+
+pattern='^\s*(@\w+\s+)*import\s+(\w+\s+)?SwiftUI(\.|\s|$)'
+rg_status=0
+offenders="$(rg --files-with-matches --glob 'Feature*/Sources/**/*Model.swift' "$pattern" .)" || rg_status=$?
+
+if (( rg_status == 0 )); then
+  echo "check-swiftui-free-models: a screen model imports SwiftUI" >&2
+  print -r -- "$offenders" >&2
+  exit 1
+fi
+
+if (( rg_status != 1 )); then
+  echo "check-swiftui-free-models: rg failed with status $rg_status" >&2
+  exit "$rg_status"
+fi
+
+echo "check-swiftui-free-models: clean"

@@ -1,0 +1,38 @@
+// swift-tools-version: 6.2
+import PackageDescription
+
+let swiftSettings: [SwiftSetting] = [
+    .defaultIsolation(MainActor.self),
+    .enableUpcomingFeature("NonisolatedNonsendingByDefault"),
+    .enableUpcomingFeature("InferIsolatedConformances"),
+]
+
+let package = Package(
+    name: "Feature__Feature__",
+    platforms: [.iOS("27.0")],
+    products: [
+        .library(name: "Feature__Feature__", targets: ["Feature__Feature__"]),
+    ],
+    dependencies: [
+        .package(path: "../CoreDomain"),
+        .package(path: "../CoreUI"),
+    ],
+    targets: [
+        .target(
+            name: "Feature__Feature__",
+            dependencies: [
+                .product(name: "CoreDomain", package: "CoreDomain"),
+                .product(name: "CoreUI", package: "CoreUI"),
+            ],
+            swiftSettings: swiftSettings
+        ),
+        .testTarget(
+            name: "Feature__Feature__Tests",
+            dependencies: [
+                "Feature__Feature__",
+                .product(name: "CoreDomain", package: "CoreDomain"),
+            ],
+            swiftSettings: swiftSettings
+        ),
+    ]
+)

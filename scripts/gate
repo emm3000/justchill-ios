@@ -1,0 +1,9 @@
+#!/usr/bin/env zsh
+set -euo pipefail
+
+repo="${0:A:h:h}"
+
+"$repo/scripts/check-swiftui-free-models"
+"$repo/scripts/build" build test
+
+echo "gate: green"

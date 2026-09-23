@@ -1,0 +1,14 @@
+import SwiftUI
+
+public struct __Feature__Screen: View {
+    @State private var model: __Feature__Model
+
+    public init(model: __Feature__Model) {
+        _model = State(initialValue: model)
+    }
+
+    public var body: some View {
+        __Feature__Content(isLoading: model.isLoading)
+            .task { await model.load() }
+    }
+}

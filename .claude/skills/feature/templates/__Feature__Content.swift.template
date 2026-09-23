@@ -1,0 +1,27 @@
+import CoreUI
+import SwiftUI
+
+struct __Feature__Content: View {
+    let isLoading: Bool
+
+    var body: some View {
+        ZStack {
+            if !isLoading {
+                Text(verbatim: "Nada por aquí todavía")
+                    .font(Typography.body)
+                    .foregroundStyle(Palette.textSecondary)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(.horizontal, Spacing.s4)
+        .background(Palette.background)
+    }
+}
+
+#Preview("Loaded") {
+    __Feature__Content(isLoading: false)
+}
+
+#Preview("Loading") {
+    __Feature__Content(isLoading: true)
+}

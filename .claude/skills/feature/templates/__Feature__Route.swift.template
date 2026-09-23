@@ -1,0 +1,3 @@
+public struct __Feature__Route: Hashable {
+    public init() {}
+}

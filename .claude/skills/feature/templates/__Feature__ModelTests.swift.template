@@ -1,0 +1,20 @@
+import Feature__Feature__
+import Testing
+
+struct __Feature__ModelTests {
+    @Test("starts loading until its first load finishes")
+    func startsLoading() {
+        let model: __Feature__Model = __Feature__Model()
+
+        #expect(model.isLoading)
+    }
+
+    @Test("stops loading once loaded")
+    func stopsLoadingOnceLoaded() async {
+        let model: __Feature__Model = __Feature__Model()
+
+        await model.load()
+
+        #expect(model.isLoading == false)
+    }
+}

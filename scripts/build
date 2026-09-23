@@ -1,0 +1,24 @@
+#!/usr/bin/env zsh
+set -euo pipefail
+
+repo="${0:A:h:h}"
+cd "$repo"
+
+if [[ -d justchill.xcodeproj ]]; then
+  xcodegen generate --quiet --use-cache
+else
+  xcodegen generate --quiet
+fi
+
+if [[ -n "${JUSTCHILL_SIMULATOR:-}" ]]; then
+  destination="platform=iOS Simulator,id=$JUSTCHILL_SIMULATOR"
+else
+  destination="platform=iOS Simulator,name=iPhone 17,OS=27.0"
+fi
+
+xcodebuild \
+  -project justchill.xcodeproj \
+  -scheme justchill \
+  -destination "$destination" \
+  -quiet \
+  "${@:-build}"

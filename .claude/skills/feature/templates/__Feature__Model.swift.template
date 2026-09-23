@@ -1,0 +1,12 @@
+import Observation
+
+@Observable
+public final class __Feature__Model {
+    public private(set) var isLoading: Bool = true
+
+    public init() {}
+
+    public func load() async {
+        isLoading = false
+    }
+}
