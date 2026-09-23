@@ -27,7 +27,7 @@ public struct MoneyText: Equatable, Sendable {
 
     public var spokenText: String {
         let number: String = "\(integer)\(fraction) soles"
-        guard let word = sign.spokenWord else { return number }
+        guard let word: String = sign.spokenWord else { return number }
         return "\(word) \(number)"
     }
 

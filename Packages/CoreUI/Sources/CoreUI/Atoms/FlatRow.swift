@@ -31,7 +31,6 @@ private struct FlatRowLabel: View {
         HStack(spacing: Spacing.s4) {
             Text(verbatim: title)
                 .font(Typography.body)
-                .foregroundStyle(Palette.textPrimary)
             Spacer(minLength: Spacing.s4)
             if let amount {
                 Text(verbatim: amount.text)
@@ -54,8 +53,10 @@ private struct FlatRowLabel: View {
 }
 
 private struct FlatRowStyle: ButtonStyle {
+    @Environment(\.isEnabled) private var isEnabled: Bool
+
     func makeBody(configuration: Configuration) -> some View {
-        FlatRowFace(isPressed: configuration.isPressed) {
+        FlatRowFace(isPressed: configuration.isPressed, isEnabled: isEnabled) {
             configuration.label
         }
     }
@@ -63,10 +64,12 @@ private struct FlatRowStyle: ButtonStyle {
 
 private struct FlatRowFace<Label: View>: View {
     let isPressed: Bool
+    let isEnabled: Bool
     @ViewBuilder let label: Label
 
     var body: some View {
         label
+            .foregroundStyle(isEnabled ? Palette.textPrimary : Palette.textTertiary)
             .background(isPressed ? Palette.surface1 : Palette.background)
             .overlay(alignment: .bottom) {
                 Rectangle()
@@ -95,8 +98,14 @@ private struct FlatRowFace<Label: View>: View {
 }
 
 #Preview("Pressed") {
-    FlatRowFace(isPressed: true) {
+    FlatRowFace(isPressed: true, isEnabled: true) {
         FlatRowLabel(title: "Préstamos", amount: nil, isNavigable: true)
     }
     .background(Palette.background)
+}
+
+#Preview("Disabled") {
+    FlatRow("Exportar") {}
+        .disabled(true)
+        .background(Palette.background)
 }

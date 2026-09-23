@@ -38,7 +38,7 @@ enum FontFace: CaseIterable, Sendable {
 
     private static func registerEachFace() {
         for face in allCases {
-            guard let url = bundle.url(forResource: face.fileName, withExtension: fileExtension, subdirectory: fontsDirectory) else { continue }
+            guard let url: URL = bundle.url(forResource: face.fileName, withExtension: fileExtension, subdirectory: fontsDirectory) else { continue }
             CTFontManagerRegisterFontsForURL(url as CFURL, .process, nil)
         }
     }

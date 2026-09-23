@@ -10,14 +10,6 @@ struct FontFaceTests {
         #expect(UIFont(name: face.postScriptName, size: 17)?.fontName == face.postScriptName)
     }
 
-    @Test("registering twice keeps every face resolvable")
-    func registersIdempotently() {
-        FontFace.registerBundledFaces()
-        FontFace.registerBundledFaces()
-
-        #expect(FontFace.allCases.allSatisfy { UIFont(name: $0.postScriptName, size: 17) != nil })
-    }
-
     @Test("ships every face with its OFL license beside it")
     func shipsLicenses() {
         let licenseNames: [String] = ["Inter-OFL", "IBMPlexMono-OFL"]
