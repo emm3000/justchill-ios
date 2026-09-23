@@ -53,10 +53,67 @@ public enum Radius {
 }
 
 public enum Typography {
-    public static let body: Font = Font.body
-    public static let label: Font = Font.headline
-    public static let caption: Font = Font.caption
-    public static let amountHero: Font = Font.system(.largeTitle, design: .monospaced).monospacedDigit()
+    public static let body: Font = TypeRole.body.font
+    public static let label: Font = TypeRole.label.font
+    public static let caption: Font = TypeRole.caption.font
+    public static let key: Font = TypeRole.key.font
+    public static let amountRow: Font = TypeRole.amountRow.font
+    public static let amountHeroMinor: Font = TypeRole.amountHeroMinor.font
+    public static let amountHero: Font = TypeRole.amountHero.font
+}
+
+enum TypeRole: CaseIterable {
+    case body
+    case label
+    case caption
+    case key
+    case amountRow
+    case amountHeroMinor
+    case amountHero
+
+    var face: FontFace {
+        switch self {
+        case .body, .caption, .key: FontFace.interRegular
+        case .label: FontFace.interSemiBold
+        case .amountRow, .amountHeroMinor, .amountHero: FontFace.plexMonoRegular
+        }
+    }
+
+    var size: CGFloat {
+        switch self {
+        case .body, .label, .amountRow: 17
+        case .caption: 12
+        case .key: 28
+        case .amountHeroMinor: 32
+        case .amountHero: 56
+        }
+    }
+
+    var textStyle: Font.TextStyle {
+        switch self {
+        case .body, .amountRow: Font.TextStyle.body
+        case .label: Font.TextStyle.headline
+        case .caption: Font.TextStyle.caption
+        case .key: Font.TextStyle.title
+        case .amountHeroMinor: Font.TextStyle.title
+        case .amountHero: Font.TextStyle.largeTitle
+        }
+    }
+
+    var font: Font {
+        FontFace.registerBundledFaces()
+        return Font.custom(face.postScriptName, size: size, relativeTo: textStyle)
+    }
+}
+
+public enum Motion {
+    public static let signatureDuration: TimeInterval = 0.4
+    public static let signature: Animation = Animation.smooth(duration: signatureDuration)
+
+    public static func signatureTransition(reduceMotion: Bool) -> AnyTransition {
+        guard !reduceMotion else { return AnyTransition.opacity }
+        return AnyTransition.move(edge: .top).combined(with: AnyTransition.opacity)
+    }
 }
 
 private extension Color {
