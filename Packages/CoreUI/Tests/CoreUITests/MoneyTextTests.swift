@@ -70,4 +70,18 @@ struct MoneyTextTests {
 
         #expect(MoneyText(amount, sign: sign).spokenText == expected)
     }
+
+    @Test("signs a net: plus and success above zero, the minus and monochrome below, unsigned at zero", arguments: [
+        (Int64(350_000), Int64(184_250), "+S/ 1,657.50", MoneySign.positive),
+        (Int64(184_250), Int64(184_250), "S/ 0.00", MoneySign.unsigned),
+        (Int64(100_000), Int64(184_250), "\u{2212}S/ 842.50", MoneySign.negative),
+    ])
+    func signsNet(incomeCents: Int64, spendCents: Int64, expected: String, sign: MoneySign) throws {
+        let income: Amount = try Amount(cents: incomeCents)
+        let spend: Amount = try Amount(cents: spendCents)
+        let net: MoneyText = MoneyText(netOf: income, minus: spend)
+
+        #expect(net.text == expected)
+        #expect(net.sign == sign)
+    }
 }

@@ -3,9 +3,11 @@ import SwiftUI
 
 public struct AmountPadScreen: View {
     @State private var model: AmountPadModel
+    private let onOpenMonth: () -> Void
 
-    public init(model: AmountPadModel) {
+    public init(model: AmountPadModel, onOpenMonth: @escaping () -> Void) {
         _model = State(initialValue: model)
+        self.onOpenMonth = onOpenMonth
     }
 
     public var body: some View {
@@ -19,7 +21,8 @@ public struct AmountPadScreen: View {
             failure: model.failure,
             onKey: press,
             onSave: { Task { await model.save() } },
-            onDismissFailure: model.dismissFailure
+            onDismissFailure: model.dismissFailure,
+            onOpenMonth: onOpenMonth
         )
         .task { await model.observe() }
     }

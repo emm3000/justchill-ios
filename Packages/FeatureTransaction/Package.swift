@@ -32,6 +32,7 @@ let package = Package(
             dependencies: [
                 "FeatureTransaction",
                 .product(name: "CoreDomain", package: "CoreDomain"),
+                .product(name: "CoreUI", package: "CoreUI"),
                 .product(name: "CoreTesting", package: "CoreTesting"),
             ],
             swiftSettings: swiftSettings

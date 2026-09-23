@@ -1,1 +1,3 @@
-enum Route: Hashable {}
+enum Route: Hashable {
+    case month
+}
