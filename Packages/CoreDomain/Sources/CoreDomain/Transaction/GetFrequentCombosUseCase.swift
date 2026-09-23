@@ -14,7 +14,7 @@ public struct GetFrequentCombosUseCase: Sendable {
     }
 
     public func callAsFunction() -> any AsyncSequence<[FrequentCombo], DomainError> {
-        rankedCombos(of: transactions.transactions(from: windowStart))
+        rankedCombos(of: transactions.categorizedTransactions(from: windowStart))
     }
 
     private func rankedCombos<WindowTransactions: AsyncSequence<[Transaction], DomainError>>(
@@ -26,7 +26,9 @@ public struct GetFrequentCombosUseCase: Sendable {
     private var windowStart: OccurredAt {
         let calendar: Calendar = Calendar.wallClock(in: zone)
         let startOfToday: Date = calendar.startOfDay(for: clock.now)
-        let windowStartInstant: Date = calendar.date(byAdding: .day, value: -Self.windowDays, to: startOfToday) ?? startOfToday
+        guard let windowStartInstant: Date = calendar.date(byAdding: .day, value: -Self.windowDays, to: startOfToday) else {
+            preconditionFailure("Gregorian day arithmetic on a valid date cannot fail")
+        }
         return OccurredAt(windowStartInstant, in: zone)
     }
 }
