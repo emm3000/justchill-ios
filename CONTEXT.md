@@ -49,6 +49,11 @@ A Transaction carrying no Category. It is a normal state, not an error.
 _Avoid_: other, misc, unfiled
 _UI term_: "Sin categoría"
 
+**Default category**:
+A Category the app ships with, present in a fresh database before the user creates anything. It is
+an ordinary Category afterwards: editable, deletable, replaced entirely by a Restore.
+_Avoid_: seed, preset, built-in, system category
+
 **Amount pad**:
 Where a Transaction is typed and the app opens: the Amount first, with the type, Account,
 Category and date taking defaults the user can override before saving.
@@ -184,12 +189,16 @@ One complete, versioned export of every table at a point in time, uploaded as a 
 _Avoid_: backup (the feature), dump, diff, delta
 
 **Export**:
-Producing a Snapshot's content from the local database.
+Producing a Snapshot's content from the local database, to upload or to hand to the user as a file.
 _Avoid_: sync, upload (the transport), dump
+_UI term_: "Exportar"
 
 **Restore**:
-Loading a Snapshot into the local database and reporting how many rows of each kind landed.
+Loading a Snapshot into the local database in place of everything it held, and reporting how many
+rows of each kind landed. Whether the Snapshot came from the cloud or from a file the user picked
+changes nothing.
 _Avoid_: sync, import (in prose), merge, download
+_UI term_: "Importar"
 
 **Local change**:
 Any write to the local database after the last successful Backup. It is the single predicate for
