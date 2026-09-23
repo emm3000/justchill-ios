@@ -34,7 +34,9 @@ struct AmountPadContent: View {
         .padding(.vertical, Spacing.s4)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Palette.background)
-        .alert("Algo salió mal", isPresented: isShowingFailure) {} message: {
+        .alert("Algo salió mal", isPresented: isShowingFailure) {
+            Button("Aceptar", role: .cancel) {}
+        } message: {
             Text(verbatim: failure?.message ?? "")
         }
     }

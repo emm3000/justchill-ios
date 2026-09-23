@@ -27,7 +27,7 @@ public final class InMemoryTransactionRepository: TransactionRepository {
 
     public func create(_ transaction: Transaction) async throws(DomainError) {
         await Task.yield()
-        if let createFailure { throw createFailure }
+        if let createFailure: DomainError = createFailure { throw createFailure }
         state.withLock { (state: inout State) in
             state.transactions.append(transaction)
             for subscriber: Subscriber in state.subscribers.values {
