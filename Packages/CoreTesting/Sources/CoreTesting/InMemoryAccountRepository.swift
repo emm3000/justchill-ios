@@ -1,6 +1,6 @@
 import CoreDomain
 
-public final class InMemoryAccountRepository: AccountRepository {
+public struct InMemoryAccountRepository: AccountRepository {
     private let live: [Account]
 
     public init(accounts: [Account]) {

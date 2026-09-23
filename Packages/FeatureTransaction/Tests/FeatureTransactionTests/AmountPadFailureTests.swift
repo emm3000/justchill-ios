@@ -44,7 +44,7 @@ struct AmountPadFailureTests {
     }
 
     @Test("holds no failure when the save is cancelled")
-    func cancelledSaveIsNoFailure() async {
+    func cancelledSaveIsNoFailure() async throws {
         let transactions: InMemoryTransactionRepository = InMemoryTransactionRepository(createFailure: .storageFailure)
         let model: AmountPadModel = fixture.makeModel(transactions: transactions)
         let observing: Task<Void, Never> = Task { await model.observe() }
@@ -57,5 +57,6 @@ struct AmountPadFailureTests {
         await saving.value
 
         #expect(model.failure == nil)
+        #expect(model.amount == (try Amount(cents: 700)))
     }
 }

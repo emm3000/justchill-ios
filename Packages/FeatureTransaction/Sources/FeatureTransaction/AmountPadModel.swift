@@ -102,6 +102,7 @@ public final class AmountPadModel {
                 apply(element)
             }
         } catch {
+            guard !Task.isCancelled else { return }
             failure = error
         }
     }

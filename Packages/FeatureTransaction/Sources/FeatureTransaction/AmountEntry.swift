@@ -25,7 +25,7 @@ struct AmountEntry: Hashable, Sendable {
 
     func deletingLast() -> AmountEntry {
         var next: AmountEntry = self
-        if let fractionDigits {
+        if let fractionDigits: String = fractionDigits {
             next.fractionDigits = fractionDigits.isEmpty ? nil : String(fractionDigits.dropLast())
         } else {
             next.integerDigits = String(integerDigits.dropLast())
