@@ -1,4 +1,4 @@
-import CoreUI
+import FeatureTransaction
 import SwiftUI
 
 struct RootView: View {
@@ -8,11 +8,7 @@ struct RootView: View {
 
     var body: some View {
         NavigationStack(path: $path) {
-            Text(verbatim: "JustChill")
-                .font(Typography.body)
-                .foregroundStyle(Palette.textSecondary)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Palette.background)
+            AmountPadScreen(model: container.makeAmountPadModel())
                 .navigationDestination(for: Route.self, destination: destination)
         }
     }

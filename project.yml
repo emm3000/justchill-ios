@@ -24,6 +24,8 @@ packages:
     path: Packages/CoreDatabase
   CoreUI:
     path: Packages/CoreUI
+  FeatureTransaction:
+    path: Packages/FeatureTransaction
 
 targets:
   justchill:
@@ -33,7 +35,9 @@ targets:
       - path: App
     dependencies:
       - package: CoreDomain
+      - package: CoreDatabase
       - package: CoreUI
+      - package: FeatureTransaction
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.emm.justchill
@@ -68,5 +72,6 @@ schemes:
         - package: CoreDomain/CoreDomainTests
         - package: CoreDatabase/CoreDatabaseTests
         - package: CoreUI/CoreUITests
+        - package: FeatureTransaction/FeatureTransactionTests
     archive:
       config: Release

@@ -24,7 +24,7 @@ GRDB.swift over the six tables: the `DatabaseMigrator`, the `{Entity}Record` typ
 - `DomainFailingSequence` ends the sequence on `CancellationError` instead of failing it: a screen leaving is not a storage failure.
 - An async GRDB `read` or `write` returns across isolation, so its value must be `Sendable`. `Row` is not: map rows to a `Sendable` value inside the closure.
 - Write `any CoreDomain.Clock`: the bare name collides with the standard library's `Clock`.
-- The database file name belongs to the composition root (wave 3), not to this package.
+- The app opens the database at `Application Support/justchill.sqlite`, chosen in `AppContainer`. The name is permanent: renaming it orphans the owner's data.
 
 ## The v1 fixture
 
