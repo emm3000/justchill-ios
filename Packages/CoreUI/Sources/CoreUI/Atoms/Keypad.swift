@@ -48,23 +48,25 @@ private struct KeypadKeyLabel: View {
         switch key {
         case .delete:
             Image(systemName: "delete.left")
-                .foregroundStyle(Palette.textSecondary)
+                .foregroundStyle(.secondary)
         case .toggleSign:
             Image(systemName: "plus.forwardslash.minus")
-                .foregroundStyle(Palette.textSecondary)
+                .foregroundStyle(.secondary)
         case .decimalSeparator:
             Text(verbatim: ".")
-                .foregroundStyle(Palette.textPrimary)
+                .foregroundStyle(.primary)
         case .zero, .one, .two, .three, .four, .five, .six, .seven, .eight, .nine:
             Text(verbatim: key.digit.map(String.init) ?? "")
-                .foregroundStyle(Palette.textPrimary)
+                .foregroundStyle(.primary)
         }
     }
 }
 
 private struct KeypadKeyStyle: ButtonStyle {
+    @Environment(\.isEnabled) private var isEnabled: Bool
+
     func makeBody(configuration: Configuration) -> some View {
-        KeypadKeyFace(isPressed: configuration.isPressed) {
+        KeypadKeyFace(isPressed: configuration.isPressed, isEnabled: isEnabled) {
             configuration.label
         }
     }
@@ -72,10 +74,12 @@ private struct KeypadKeyStyle: ButtonStyle {
 
 private struct KeypadKeyFace<Label: View>: View {
     let isPressed: Bool
+    let isEnabled: Bool
     @ViewBuilder let label: Label
 
     var body: some View {
         label
+            .foregroundStyle(isEnabled ? Palette.textPrimary : Palette.textTertiary, isEnabled ? Palette.textSecondary : Palette.textTertiary)
             .background {
                 if isPressed {
                     RoundedRectangle(cornerRadius: Radius.m)
@@ -94,13 +98,21 @@ private struct KeypadKeyFace<Label: View>: View {
 
 #Preview("Pressed key") {
     HStack(spacing: Spacing.s2) {
-        KeypadKeyFace(isPressed: false) { KeypadKeyLabel(key: .seven) }
-        KeypadKeyFace(isPressed: true) { KeypadKeyLabel(key: .eight) }
-        KeypadKeyFace(isPressed: true) { KeypadKeyLabel(key: .delete) }
+        KeypadKeyFace(isPressed: false, isEnabled: true) { KeypadKeyLabel(key: .seven) }
+        KeypadKeyFace(isPressed: true, isEnabled: true) { KeypadKeyLabel(key: .eight) }
+        KeypadKeyFace(isPressed: true, isEnabled: true) { KeypadKeyLabel(key: .delete) }
     }
     .frame(height: Spacing.s16)
     .padding(Spacing.s4)
     .background(Palette.background)
+}
+
+#Preview("Disabled") {
+    Keypad { _ in }
+        .disabled(true)
+        .frame(maxHeight: .infinity)
+        .padding(Spacing.s4)
+        .background(Palette.background)
 }
 
 #Preview("Accessibility size") {
