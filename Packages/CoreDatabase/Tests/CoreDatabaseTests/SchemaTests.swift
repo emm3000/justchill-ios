@@ -11,11 +11,16 @@ struct SchemaTests {
         let onDelete: String
     }
 
+    private let directory: TemporaryDirectory
+    private let database: AppDatabase
+
+    init() throws {
+        directory = try TemporaryDirectory()
+        database = try AppDatabase.open(at: directory.databaseURL)
+    }
+
     @Test("migrates a new file to head through exactly one migration, v1")
     func appliesOneMigration() throws {
-        let directory: TemporaryDirectory = try TemporaryDirectory()
-        let database: AppDatabase = try AppDatabase.open(at: directory.databaseURL)
-
         let applied: [String] = try database.writer.read { (db: Database) throws -> [String] in
             try DatabaseMigrator.app.appliedIdentifiers(db).sorted()
         }
@@ -26,8 +31,6 @@ struct SchemaTests {
 
     @Test("creates the six tables, each with userId, deletedAt and a Pending syncState")
     func createsSixTablesWithSyncColumns() throws {
-        let directory: TemporaryDirectory = try TemporaryDirectory()
-        let database: AppDatabase = try AppDatabase.open(at: directory.databaseURL)
         let tables: [String] = ["accounts", "categories", "transactions", "recurring_movements", "loans", "loan_payments"]
 
         let syncColumns: [String: [String: String?]] = try database.writer.read { (db: Database) throws -> [String: [String: String?]] in
@@ -46,9 +49,6 @@ struct SchemaTests {
 
     @Test("keys every movement's (categoryId, type) to categories(categoryId, categoryType) with no ON DELETE")
     func keysMovementsToCategoryType() throws {
-        let directory: TemporaryDirectory = try TemporaryDirectory()
-        let database: AppDatabase = try AppDatabase.open(at: directory.databaseURL)
-
         let keys: Set<CategoryTypeKey> = try database.writer.read { (db: Database) throws -> Set<CategoryTypeKey> in
             try Set(["transactions", "recurring_movements"].flatMap { (table: String) throws -> [CategoryTypeKey] in
                 try Row.fetchAll(db, sql: "SELECT * FROM pragma_foreign_key_list(?) WHERE \"table\" = 'categories'", arguments: [table])
@@ -68,9 +68,6 @@ struct SchemaTests {
 
     @Test("indexes categories(categoryId, categoryType) as UNIQUE, the parent the composite key needs")
     func indexesCategoryTypeAsUnique() throws {
-        let directory: TemporaryDirectory = try TemporaryDirectory()
-        let database: AppDatabase = try AppDatabase.open(at: directory.databaseURL)
-
         let uniqueIndexColumns: [[String]] = try database.writer.read { (db: Database) throws -> [[String]] in
             try db.indexes(on: "categories")
                 .filter { (index: IndexInfo) -> Bool in index.isUnique }

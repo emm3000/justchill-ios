@@ -15,13 +15,14 @@ struct FixtureMigrationTests {
         let loanPayments: Int
     }
 
+    private let directory: TemporaryDirectory
     private let database: AppDatabase
 
     init() throws {
         let fixture: URL = try #require(Bundle.module.url(forResource: "v1", withExtension: "sqlite", subdirectory: "Fixtures"))
-        let copy: URL = try TemporaryDirectory().databaseURL
-        try FileManager.default.copyItem(at: fixture, to: copy)
-        database = try AppDatabase.open(at: copy)
+        directory = try TemporaryDirectory()
+        try FileManager.default.copyItem(at: fixture, to: directory.databaseURL)
+        database = try AppDatabase.open(at: directory.databaseURL)
     }
 
     @Test("opens the v1 fixture at head with every table's rows and the seeds intact")

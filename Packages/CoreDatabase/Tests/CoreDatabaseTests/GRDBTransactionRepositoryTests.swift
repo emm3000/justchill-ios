@@ -13,12 +13,14 @@ struct GRDBTransactionRepositoryTests {
     }
 
     private let august: Month
+    private let directory: TemporaryDirectory
     private let database: AppDatabase
     private let repository: GRDBTransactionRepository
 
     init() throws {
         august = try Month(year: 2026, month: 8)
-        database = try AppDatabase.open(at: try TemporaryDirectory().databaseURL)
+        directory = try TemporaryDirectory()
+        database = try AppDatabase.open(at: directory.databaseURL)
         let clock: FixedClock = FixedClock(now: Date(timeIntervalSince1970: 1_790_091_000.25))
         repository = GRDBTransactionRepository(database: database, clock: clock)
     }

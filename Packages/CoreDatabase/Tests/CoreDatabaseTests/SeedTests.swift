@@ -37,11 +37,16 @@ struct SeedTests {
         SeededCategory(name: "Otros", icon: "wallet", color: "gray", categoryType: "Income"),
     ]
 
+    private let directory: TemporaryDirectory
+    private let database: AppDatabase
+
+    init() throws {
+        directory = try TemporaryDirectory()
+        database = try AppDatabase.open(at: directory.databaseURL)
+    }
+
     @Test("seeds the 23 Android Default categories, 16 Spend and 7 Income")
     func seedsDefaultCategories() throws {
-        let directory: TemporaryDirectory = try TemporaryDirectory()
-        let database: AppDatabase = try AppDatabase.open(at: directory.databaseURL)
-
         let rows: [Row] = try database.writer.read { (db: Database) throws -> [Row] in
             try Row.fetchAll(db, sql: "SELECT name, icon, color, categoryType, isDefault FROM categories")
         }
@@ -56,9 +61,6 @@ struct SeedTests {
 
     @Test("seeds one live Cash Account named Efectivo in PEN")
     func seedsCashAccount() throws {
-        let directory: TemporaryDirectory = try TemporaryDirectory()
-        let database: AppDatabase = try AppDatabase.open(at: directory.databaseURL)
-
         let rows: [Row] = try database.writer.read { (db: Database) throws -> [Row] in
             try Row.fetchAll(db, sql: "SELECT name, type, currency, deletedAt FROM accounts")
         }
@@ -73,9 +75,6 @@ struct SeedTests {
 
     @Test("gives every seeded row a lowercase UUID id and one fixed epoch-ms stamp")
     func seedsLowercaseIDs() throws {
-        let directory: TemporaryDirectory = try TemporaryDirectory()
-        let database: AppDatabase = try AppDatabase.open(at: directory.databaseURL)
-
         let rows: [Row] = try database.writer.read { (db: Database) throws -> [Row] in
             try Row.fetchAll(
                 db,

@@ -4,11 +4,13 @@ import GRDB
 import Testing
 
 struct GRDBAccountRepositoryTests {
+    private let directory: TemporaryDirectory
     private let database: AppDatabase
     private let repository: GRDBAccountRepository
 
     init() throws {
-        database = try AppDatabase.open(at: try TemporaryDirectory().databaseURL)
+        directory = try TemporaryDirectory()
+        database = try AppDatabase.open(at: directory.databaseURL)
         repository = GRDBAccountRepository(database: database)
     }
 
