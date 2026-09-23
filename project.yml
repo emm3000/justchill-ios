@@ -64,5 +64,6 @@ schemes:
       gatherCoverageData: false
       targets:
         - package: CoreDomain/CoreDomainTests
+        - package: CoreUI/CoreUITests
     archive:
       config: Release

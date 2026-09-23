@@ -20,6 +20,12 @@ let package = Package(
         .target(
             name: "CoreUI",
             dependencies: [.product(name: "CoreDomain", package: "CoreDomain")],
+            resources: [.copy("Resources/Fonts")],
+            swiftSettings: swiftSettings
+        ),
+        .testTarget(
+            name: "CoreUITests",
+            dependencies: ["CoreUI", .product(name: "CoreDomain", package: "CoreDomain")],
             swiftSettings: swiftSettings
         ),
     ]
