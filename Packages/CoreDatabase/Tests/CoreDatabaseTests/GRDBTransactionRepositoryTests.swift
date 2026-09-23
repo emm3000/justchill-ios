@@ -97,6 +97,80 @@ struct GRDBTransactionRepositoryTests {
         #expect(stored == StoredColumns(occurredAt: "2026-08-05T07:08:09", createdAt: 1_790_091_000_250, updatedAt: 1_790_091_000_250, syncState: "Pending"))
     }
 
+    @Test("keeps a movement on or after the window start and drops the second before it")
+    func windowsFromStart() async throws {
+        let start: OccurredAt = try OccurredAt(year: 2026, month: 6, day: 24, hour: 0, minute: 0, second: 0)
+        try await repository.create(makeTransaction(
+            "counted",
+            occurredAt: start,
+            categoryID: CategoryID.seededGroceries
+        ))
+        try await repository.create(makeTransaction(
+            "excluded",
+            occurredAt: try OccurredAt(year: 2026, month: 6, day: 23, hour: 23, minute: 59, second: 59),
+            categoryID: CategoryID.seededGroceries
+        ))
+
+        let fromStart: [Transaction] = try await firstValue(of: repository.transactions(from: start))
+
+        #expect(fromStart.map { (transaction: Transaction) -> String in transaction.id.rawValue } == ["counted"])
+    }
+
+    @Test("never yields a combo whose Account is soft-deleted")
+    func hidesSoftDeletedAccount() async throws {
+        try await database.writer.write { (db: Database) throws in
+            try db.execute(sql: """
+                INSERT INTO accounts (accountId, name, type, currency, createdAt, updatedAt, deletedAt) VALUES
+                ('closed', 'Vieja', 'Bank', 'PEN', 1790040000000, 1790040000000, 1790050000000)
+                """)
+            try db.execute(sql: """
+                INSERT INTO transactions (transactionId, type, amount, occurredAt, categoryId, accountId, createdAt, updatedAt) VALUES
+                ('from-closed', 'Spend', 1250, '2026-08-12T09:00:00', ?, 'closed', 1790091000250, 1790091000250)
+                """, arguments: [CategoryID.seededGroceries.rawValue])
+        }
+
+        let fromStart: [Transaction] = try await firstValue(of: repository.transactions(from: try OccurredAt(year: 2026, month: 8, day: 1, hour: 0, minute: 0, second: 0)))
+
+        #expect(fromStart.isEmpty)
+    }
+
+    @Test("never yields a combo whose Category is soft-deleted")
+    func hidesSoftDeletedCategory() async throws {
+        try await database.writer.write { (db: Database) throws in
+            try db.execute(sql: "UPDATE categories SET deletedAt = 1790091000250 WHERE categoryId = ?", arguments: [CategoryID.seededGroceries.rawValue])
+        }
+        try await repository.create(makeTransaction(
+            "under-deleted-category",
+            occurredAt: try OccurredAt(year: 2026, month: 8, day: 12, hour: 9, minute: 0, second: 0),
+            categoryID: CategoryID.seededGroceries
+        ))
+
+        let fromStart: [Transaction] = try await firstValue(of: repository.transactions(from: try OccurredAt(year: 2026, month: 8, day: 1, hour: 0, minute: 0, second: 0)))
+
+        #expect(fromStart.isEmpty)
+    }
+
+    @Test("never counts a soft-deleted Transaction")
+    func excludesSoftDeletedTransaction() async throws {
+        try await repository.create(makeTransaction(
+            "kept",
+            occurredAt: try OccurredAt(year: 2026, month: 8, day: 12, hour: 9, minute: 0, second: 0),
+            categoryID: CategoryID.seededGroceries
+        ))
+        try await repository.create(makeTransaction(
+            "deleted",
+            occurredAt: try OccurredAt(year: 2026, month: 8, day: 13, hour: 9, minute: 0, second: 0),
+            categoryID: CategoryID.seededGroceries
+        ))
+        try await database.writer.write { (db: Database) throws in
+            try db.execute(sql: "UPDATE transactions SET deletedAt = 1790091000250 WHERE transactionId = 'deleted'")
+        }
+
+        let fromStart: [Transaction] = try await firstValue(of: repository.transactions(from: try OccurredAt(year: 2026, month: 8, day: 1, hour: 0, minute: 0, second: 0)))
+
+        #expect(fromStart.map { (transaction: Transaction) -> String in transaction.id.rawValue } == ["kept"])
+    }
+
     private func makeTransaction(
         _ id: String,
         occurredAt: OccurredAt,
