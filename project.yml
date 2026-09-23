@@ -20,6 +20,8 @@ settings:
 packages:
   CoreDomain:
     path: Packages/CoreDomain
+  CoreDatabase:
+    path: Packages/CoreDatabase
   CoreUI:
     path: Packages/CoreUI
 
@@ -64,6 +66,7 @@ schemes:
       gatherCoverageData: false
       targets:
         - package: CoreDomain/CoreDomainTests
+        - package: CoreDatabase/CoreDatabaseTests
         - package: CoreUI/CoreUITests
     archive:
       config: Release
