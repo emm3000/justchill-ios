@@ -29,6 +29,13 @@ struct TransactionRecord: Codable, FetchableRecord, PersistableRecord {
 }
 
 extension TransactionRecord {
+    static let account: BelongsToAssociation<TransactionRecord, AccountRecord> =
+        belongsTo(AccountRecord.self, using: ForeignKey(["accountId"], to: ["accountId"]))
+    static let category: BelongsToAssociation<TransactionRecord, CategoryRecord> =
+        belongsTo(CategoryRecord.self, using: ForeignKey(["categoryId", "type"], to: ["categoryId", "categoryType"]))
+}
+
+extension TransactionRecord {
     init(_ transaction: Transaction, writtenAt epochMilliseconds: Int64) {
         transactionID = transaction.id.rawValue
         type = transaction.type.rawValue

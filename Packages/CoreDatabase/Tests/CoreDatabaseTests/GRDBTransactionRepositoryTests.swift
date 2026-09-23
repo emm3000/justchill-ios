@@ -111,13 +111,13 @@ struct GRDBTransactionRepositoryTests {
             categoryID: CategoryID.seededGroceries
         ))
 
-        let fromStart: [Transaction] = try await firstValue(of: repository.transactions(from: start))
+        let fromStart: [Transaction] = try await firstValue(of: repository.categorizedTransactions(from: start))
 
         #expect(fromStart.map { (transaction: Transaction) -> String in transaction.id.rawValue } == ["counted"])
     }
 
-    @Test("never yields a combo whose Account is soft-deleted")
-    func hidesSoftDeletedAccount() async throws {
+    @Test("drops a Transaction filed under a soft-deleted Account and keeps a live control")
+    func dropsTransactionUnderSoftDeletedAccount() async throws {
         try await database.writer.write { (db: Database) throws in
             try db.execute(sql: """
                 INSERT INTO accounts (accountId, name, type, currency, createdAt, updatedAt, deletedAt) VALUES
@@ -128,14 +128,19 @@ struct GRDBTransactionRepositoryTests {
                 ('from-closed', 'Spend', 1250, '2026-08-12T09:00:00', ?, 'closed', 1790091000250, 1790091000250)
                 """, arguments: [CategoryID.seededGroceries.rawValue])
         }
+        try await repository.create(makeTransaction(
+            "from-live-account",
+            occurredAt: try OccurredAt(year: 2026, month: 8, day: 12, hour: 9, minute: 0, second: 0),
+            categoryID: CategoryID.seededGroceries
+        ))
 
-        let fromStart: [Transaction] = try await firstValue(of: repository.transactions(from: try OccurredAt(year: 2026, month: 8, day: 1, hour: 0, minute: 0, second: 0)))
+        let fromStart: [Transaction] = try await firstValue(of: repository.categorizedTransactions(from: try OccurredAt(year: 2026, month: 8, day: 1, hour: 0, minute: 0, second: 0)))
 
-        #expect(fromStart.isEmpty)
+        #expect(fromStart.map { (transaction: Transaction) -> String in transaction.id.rawValue } == ["from-live-account"])
     }
 
-    @Test("never yields a combo whose Category is soft-deleted")
-    func hidesSoftDeletedCategory() async throws {
+    @Test("drops a Transaction filed under a soft-deleted Category and keeps a live control")
+    func dropsTransactionUnderSoftDeletedCategory() async throws {
         try await database.writer.write { (db: Database) throws in
             try db.execute(sql: "UPDATE categories SET deletedAt = 1790091000250 WHERE categoryId = ?", arguments: [CategoryID.seededGroceries.rawValue])
         }
@@ -144,10 +149,16 @@ struct GRDBTransactionRepositoryTests {
             occurredAt: try OccurredAt(year: 2026, month: 8, day: 12, hour: 9, minute: 0, second: 0),
             categoryID: CategoryID.seededGroceries
         ))
+        try await repository.create(makeTransaction(
+            "under-live-category",
+            occurredAt: try OccurredAt(year: 2026, month: 8, day: 12, hour: 9, minute: 0, second: 0),
+            categoryID: CategoryID.seededSalary,
+            type: .income
+        ))
 
-        let fromStart: [Transaction] = try await firstValue(of: repository.transactions(from: try OccurredAt(year: 2026, month: 8, day: 1, hour: 0, minute: 0, second: 0)))
+        let fromStart: [Transaction] = try await firstValue(of: repository.categorizedTransactions(from: try OccurredAt(year: 2026, month: 8, day: 1, hour: 0, minute: 0, second: 0)))
 
-        #expect(fromStart.isEmpty)
+        #expect(fromStart.map { (transaction: Transaction) -> String in transaction.id.rawValue } == ["under-live-category"])
     }
 
     @Test("never counts a soft-deleted Transaction")
@@ -166,7 +177,7 @@ struct GRDBTransactionRepositoryTests {
             try db.execute(sql: "UPDATE transactions SET deletedAt = 1790091000250 WHERE transactionId = 'deleted'")
         }
 
-        let fromStart: [Transaction] = try await firstValue(of: repository.transactions(from: try OccurredAt(year: 2026, month: 8, day: 1, hour: 0, minute: 0, second: 0)))
+        let fromStart: [Transaction] = try await firstValue(of: repository.categorizedTransactions(from: try OccurredAt(year: 2026, month: 8, day: 1, hour: 0, minute: 0, second: 0)))
 
         #expect(fromStart.map { (transaction: Transaction) -> String in transaction.id.rawValue } == ["kept"])
     }
@@ -174,12 +185,13 @@ struct GRDBTransactionRepositoryTests {
     private func makeTransaction(
         _ id: String,
         occurredAt: OccurredAt,
-        categoryID: CategoryID? = nil
+        categoryID: CategoryID? = nil,
+        type: TransactionType = .spend
     ) throws -> Transaction {
         Transaction(
             id: TransactionID(id),
             TransactionInsert(
-                type: .spend,
+                type: type,
                 amount: try Amount(cents: 1_250),
                 description: "Almuerzo",
                 occurredAt: occurredAt,

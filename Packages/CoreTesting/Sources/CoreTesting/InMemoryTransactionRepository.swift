@@ -40,7 +40,7 @@ public final class InMemoryTransactionRepository: TransactionRepository {
                 subscriber.continuation.yield(state.transactions.inMonth(subscriber.month))
             }
             for subscriber: SinceSubscriber in state.sinceSubscribers.values {
-                subscriber.continuation.yield(state.transactions.since(subscriber.start))
+                subscriber.continuation.yield(state.transactions.categorized(since: subscriber.start))
             }
         }
     }
@@ -59,13 +59,13 @@ public final class InMemoryTransactionRepository: TransactionRepository {
         return NeverFailingSequence(stream)
     }
 
-    public func transactions(from start: OccurredAt) -> any AsyncSequence<[Transaction], DomainError> {
+    public func categorizedTransactions(from start: OccurredAt) -> any AsyncSequence<[Transaction], DomainError> {
         let (stream, continuation): (AsyncStream<[Transaction]>, AsyncStream<[Transaction]>.Continuation) =
             AsyncStream.makeStream(of: [Transaction].self)
         let subscriberID: UUID = UUID()
         state.withLock { (state: inout State) in
             state.sinceSubscribers[subscriberID] = SinceSubscriber(start: start, continuation: continuation)
-            continuation.yield(state.transactions.since(start))
+            continuation.yield(state.transactions.categorized(since: start))
         }
         continuation.onTermination = { [weak self] (_: AsyncStream<[Transaction]>.Continuation.Termination) in
             self?.state.withLock { (state: inout State) in state.sinceSubscribers[subscriberID] = nil }
@@ -79,7 +79,7 @@ private extension [Transaction] {
         filter { (transaction: Transaction) -> Bool in transaction.occurredAt.month == month }
     }
 
-    func since(_ start: OccurredAt) -> [Transaction] {
-        filter { (transaction: Transaction) -> Bool in transaction.occurredAt >= start }
+    func categorized(since start: OccurredAt) -> [Transaction] {
+        filter { (transaction: Transaction) -> Bool in transaction.occurredAt >= start && transaction.categoryID != nil }
     }
 }
