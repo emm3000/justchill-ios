@@ -30,4 +30,23 @@ public final class GRDBTransactionRepository: TransactionRepository {
         }
         return DomainFailingSequence(observation.values(in: database.writer))
     }
+
+    public func transactions(from start: OccurredAt) -> any AsyncSequence<[Transaction], DomainError> {
+        let startText: String = start.databaseText
+        let observation: ValueObservation<ValueReducers.Fetch<[Transaction]>> = ValueObservation.tracking { (db: Database) throws -> [Transaction] in
+            try TransactionRecord.fetchAll(
+                db,
+                sql: """
+                SELECT transactions.* FROM transactions
+                JOIN accounts ON accounts.accountId = transactions.accountId AND accounts.deletedAt IS NULL
+                JOIN categories ON categories.categoryId = transactions.categoryId
+                    AND categories.categoryType = transactions.type AND categories.deletedAt IS NULL
+                WHERE transactions.deletedAt IS NULL AND transactions.occurredAt >= ?
+                """,
+                arguments: [startText]
+            )
+            .map { (record: TransactionRecord) throws(DomainError) -> Transaction in try Transaction(record) }
+        }
+        return DomainFailingSequence(observation.values(in: database.writer))
+    }
 }
